@@ -5,30 +5,47 @@
   void yyerror(const char *str);
   int yywrap();
   int yylex();
+
+char *identifiers[100];
 %}
 
-%token NUMBER START STOP WORD EOL WS
+%start line
+%token NUM
+%token ASSIGN
+%token START
+%token STOP
+%token ID
+%token WS
+%token EOL
+%token OPERATOR
 
 %%
 
-commands :
-     /* empty */
+line :
      |
-     commands command
+     command
+     |
+     line command
      ;
 
 command :
-     start_command
+     start_command {;}
      |
-     stop_command
+     stop_command {;}
+     |
+     assignment_command {;}
+     ;
+
+assignment_command :
+     ASSIGN WS ID WS OPERATOR WS NUM{printf("assignment command");}
      ;
 
 start_command :
-     optional_ws START WS WORD optional_ws EOL
+     START WS ID EOL{printf("Starting Program\n");}
      ;
 
 stop_command :
-     optional_ws STOP optional_ws EOL
+     optional_ws STOP optional_ws {printf("stop command");}
      ;
 
 optional_ws :
@@ -41,10 +58,9 @@ optional_ws :
 
 void yyerror(const char *str)
 {
-  fprintf(stderr,"error: %s\n",str);
+  fprintf(stderr,"found an error: %s\n",str);
 }
 int main(int argc, char *argv[])
 {
-  yyparse();
-  return 0;
+  return yyparse();
 }
